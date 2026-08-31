@@ -15,7 +15,7 @@ export const Login = () => {
 	const [loading, setLoading] = useState(false);
 
 	if (store.user) {
-		return <Navigate to={`/profile/${store.user.steam_id}`} replace />;
+		return <Navigate to={store.user.steam_id ? `/profile/${store.user.steam_id}` : "/search"} replace />;
 	}
 
 	const handleSubmit = async (e) => {
@@ -26,7 +26,7 @@ export const Login = () => {
 			const loginData = await api.login({ email, password });
 			const me = await api.me(loginData.token);
 			dispatch({ type: "set_session", payload: { token: loginData.token, user: me.user } });
-			navigate(`/profile/${me.user.steam_id}`);
+			navigate(me.user.steam_id ? `/profile/${me.user.steam_id}` : "/search");
 		} catch (err) {
 			setError(err.message);
 		} finally {

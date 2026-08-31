@@ -18,16 +18,16 @@ CORS(api)
 def create_user():
 
     data = request.get_json()
-    steam_id = data.get("steam_id")
+    steam_id = (data.get("steam_id") or "").strip() or None
     email = data.get("email")
     password = data.get("password")
     nickname = data.get("nickname")
     avatar_url = data.get("avatar_url")
     profile_url = data.get("profile_url")
 
-    if not steam_id or not email or not password or not nickname:
+    if not email or not password or not nickname:
         return jsonify({
-            "error": "steam_id, email, password and nickname are required"
+            "error": "email, password and nickname are required"
         }), 400
 
     existing_user = db.session.execute(db.select(User).where(
@@ -35,11 +35,19 @@ def create_user():
     if existing_user:
         return jsonify({"error": "User whith this email already exist"}), 400
 
+    if steam_id:
+        existing_steam = db.session.execute(db.select(User).where(
+            User.steam_id == steam_id)).scalar_one_or_none()
+        if existing_steam:
+            return jsonify({"error": "This SteamID is already linked to another account"}), 400
+
     # avatar/profile url son opcionales: generamos unos por defecto si no llegan
+    # (el steam_id es opcional, así que usamos el email como semilla del avatar si no hay steam_id)
+    avatar_seed = steam_id or email
     if not avatar_url:
-        avatar_url = f"https://i.pravatar.cc/184?u={steam_id}"
+        avatar_url = f"https://i.pravatar.cc/184?u={avatar_seed}"
     if not profile_url:
-        profile_url = f"https://steamcommunity.com/profiles/{steam_id}/"
+        profile_url = f"https://steamcommunity.com/profiles/{steam_id}/" if steam_id else None
 
     new_user = User(
         steam_id=steam_id,

@@ -21,6 +21,7 @@ export const Navbar = () => {
 	const mySteamId = store.user?.steam_id;
 	const isViewingOwnProfile = steamId && mySteamId && steamId === mySteamId;
 	const homeSteamId = mySteamId || steamId;
+	const logoTarget = mySteamId ? `/profile/${mySteamId}` : (store.user ? "/search" : "/login");
 
 	const handleLogout = () => {
 		dispatch({ type: "logout" });
@@ -32,7 +33,7 @@ export const Navbar = () => {
 	return (
 		<nav className={`sv-navbar${scrolled ? " scrolled" : ""}`}>
 			<div className="container d-flex justify-content-between align-items-center">
-				<Link to={mySteamId ? `/profile/${mySteamId}` : "/login"} className="sv-logo">
+				<Link to={logoTarget} className="sv-logo">
 					<i className="fa-solid fa-gamepad"></i>STEAM<span>VIEW</span>
 				</Link>
 

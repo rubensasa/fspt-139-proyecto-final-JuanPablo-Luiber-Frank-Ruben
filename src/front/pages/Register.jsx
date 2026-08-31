@@ -17,7 +17,7 @@ export const Register = () => {
 	const [loading, setLoading] = useState(false);
 
 	if (store.user) {
-		return <Navigate to={`/profile/${store.user.steam_id}`} replace />;
+		return <Navigate to={store.user.steam_id ? `/profile/${store.user.steam_id}` : "/search"} replace />;
 	}
 
 	const handleSubmit = async (e) => {
@@ -31,9 +31,9 @@ export const Register = () => {
 
 		setLoading(true);
 		try {
-			const data = await api.register({ nickname, email, password, steam_id: steamId });
+			const data = await api.register({ nickname, email, password, steam_id: steamId.trim() || null });
 			dispatch({ type: "set_session", payload: { token: data.token, user: data.user } });
-			navigate(`/profile/${data.user.steam_id}`);
+			navigate(data.user.steam_id ? `/profile/${data.user.steam_id}` : "/search");
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -92,10 +92,10 @@ export const Register = () => {
 								value={password} onChange={(e) => setPassword(e.target.value)} />
 						</div>
 						<div className="mb-4">
-							<label className="form-label">SteamID64 o vanity URL</label>
-							<input type="text" className="form-control" placeholder="76561198000000000 o mi_nombre_steam" required
+							<label className="form-label">SteamID64 o vanity URL <span style={{ textTransform: "none", opacity: .7 }}>(opcional)</span></label>
+							<input type="text" className="form-control" placeholder="76561198000000000 o mi_nombre_steam"
 								value={steamId} onChange={(e) => setSteamId(e.target.value)} />
-							<p className="sv-auth-hint">Es lo que buscaremos cada vez que inicies sesión. En modo demo puedes escribir lo que quieras.</p>
+							<p className="sv-auth-hint">Es lo que buscaremos cada vez que inicies sesión. Puedes dejarlo en blanco y vincularlo más tarde.</p>
 						</div>
 						<button type="submit" className="btn sv-btn-accent w-100" disabled={loading}>
 							{loading ? "Creando cuenta…" : <>Crear cuenta <i className="fa-solid fa-arrow-right ms-1"></i></>}

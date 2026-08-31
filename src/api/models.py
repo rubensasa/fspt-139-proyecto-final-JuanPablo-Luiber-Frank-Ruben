@@ -3,7 +3,7 @@ from datetime import date, datetime
 from sqlalchemy import String, Boolean, Date, ForeignKey, Table, Column, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
-from typing import List
+from typing import List, Optional
 
 db = SQLAlchemy()
 
@@ -17,13 +17,13 @@ friends_table = Table(
 # anadir el id y el steam_id
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    steam_id: Mapped[str] = mapped_column(unique=True, nullable=False)
+    steam_id: Mapped[Optional[str]] = mapped_column(unique=True, nullable=True)
     email: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)
     nickname: Mapped[str] = mapped_column(String(40), nullable=False)
     avatar_url: Mapped[str] = mapped_column(String(500),nullable=False)
-    profile_url: Mapped[str] = mapped_column(String(500),nullable=False)
+    profile_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.now, nullable=False)
     friendships: Mapped[List["User"]] = relationship(
         "User",
