@@ -11,6 +11,7 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Profile } from "./pages/Profile";
 import { Games } from "./pages/Games";
+import { MyGames } from "./pages/MyGames";
 import { Achievements } from "./pages/Achievements";
 import { Search } from "./pages/Search";
 import { PublicProfile } from "./pages/PublicProfile";
@@ -28,6 +29,7 @@ export const router = createBrowserRouter(
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/games" element={<Games />} />
+          <Route path="/profile/my-games" element={<MyGames />} />
           <Route path="/profile/achievements" element={<Achievements />} />
 
           {/* Perfil público: sin cuenta ni sesión, cualquier SteamID64 o vanity URL */}

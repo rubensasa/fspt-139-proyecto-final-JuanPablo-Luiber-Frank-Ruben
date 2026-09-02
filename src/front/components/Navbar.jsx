@@ -45,6 +45,7 @@ export const Navbar = () => {
 						<ul className="sv-nav-links">
 							<li><Link to="/profile" onClick={closeMenu}>Perfil</Link></li>
 							<li><Link to="/profile/games" onClick={closeMenu}>Juegos</Link></li>
+							<li><Link to="/profile/my-games" onClick={closeMenu}>Mis juegos</Link></li>
 							<li><Link to="/profile/achievements" onClick={closeMenu}>Logros</Link></li>
 							<li><Link to="/profile#friends" onClick={closeMenu}>Amigos</Link></li>
 						</ul>

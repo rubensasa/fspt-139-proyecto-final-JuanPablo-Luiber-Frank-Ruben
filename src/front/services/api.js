@@ -42,9 +42,12 @@ export const api = {
   unlinkSteam: (token) => request("/steam/account", { method: "DELETE", token }),
   steamProfile: (token) => request("/steam/profile", { token }),
 
-  // juegos reales (sincronizados desde la Steam Web API)
+  // juegos reales (sincronizados desde la Steam Web API, endpoint propio)
   syncGames: (token) => request("/steam/sync-games", { method: "POST", token }),
+
+  // juegos del usuario — endpoints originales del equipo (GET lista, POST añade/actualiza)
   userGames: (userId, token) => request(`/users/${userId}/games`, { token }),
+  addUserGames: (userId, games, token) => request(`/users/${userId}/games`, { method: "POST", token, body: { games } }),
 
   // logros reales
   achievements: (appid, token) => request(`/achievements/${appid}`, { token }),
