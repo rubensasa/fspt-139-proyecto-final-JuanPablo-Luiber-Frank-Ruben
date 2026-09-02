@@ -84,6 +84,7 @@ export const Login = () => {
 					</form>
 
 					<p className="sv-auth-footer">¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>
+					<p className="sv-auth-footer"><Link to="/search">Explorar un perfil sin cuenta →</Link></p>
 				</div>
 			</div>
 		</div>

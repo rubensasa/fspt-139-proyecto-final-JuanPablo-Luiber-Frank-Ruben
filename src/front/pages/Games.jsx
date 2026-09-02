@@ -76,7 +76,7 @@ export const Games = () => {
 
 				<div className="row g-3">
 					{filteredGames.map((ug) => (
-						<GameCard key={ug.id} userGame={ug} isFavorite={favorites.includes(ug.game.appid)} onToggleFavorite={toggleFavorite} />
+						<GameCard key={ug.id} userGame={ug} isFavorite={favorites.includes(ug.game.appid)} onToggleFavorite={toggleFavorite} achievementsLink={`/profile/achievements?appid=${ug.game.appid}`} />
 					))}
 				</div>
 				{!loading && filteredGames.length === 0 && (

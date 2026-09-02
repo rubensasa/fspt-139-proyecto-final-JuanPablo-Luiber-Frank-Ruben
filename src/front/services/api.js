@@ -53,4 +53,9 @@ export const api = {
   favorites: (token) => request("/favorites", { token }),
   addFavorite: (appid, token) => request(`/favorites/${appid}`, { method: "POST", token }),
   removeFavorite: (appid, token) => request(`/favorites/${appid}`, { method: "DELETE", token }),
+
+  // perfil público: sin cuenta ni sesión, cualquier SteamID64 o vanity URL
+  publicProfile: (identifier) => request(`/steam/public/${encodeURIComponent(identifier)}`),
+  publicGames: (steamId) => request(`/steam/public/${encodeURIComponent(steamId)}/games`),
+  publicAchievements: (steamId, appid) => request(`/steam/public/${encodeURIComponent(steamId)}/achievements/${appid}`),
 };

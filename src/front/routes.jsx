@@ -12,6 +12,10 @@ import { Register } from "./pages/Register";
 import { Profile } from "./pages/Profile";
 import { Games } from "./pages/Games";
 import { Achievements } from "./pages/Achievements";
+import { Search } from "./pages/Search";
+import { PublicProfile } from "./pages/PublicProfile";
+import { PublicGames } from "./pages/PublicGames";
+import { PublicAchievements } from "./pages/PublicAchievements";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -25,6 +29,12 @@ export const router = createBrowserRouter(
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/games" element={<Games />} />
           <Route path="/profile/achievements" element={<Achievements />} />
+
+          {/* Perfil público: sin cuenta ni sesión, cualquier SteamID64 o vanity URL */}
+          <Route path="/search" element={<Search />} />
+          <Route path="/u/:steamId" element={<PublicProfile />} />
+          <Route path="/u/:steamId/games" element={<PublicGames />} />
+          <Route path="/u/:steamId/achievements" element={<PublicAchievements />} />
         </Route>
       </>
     )

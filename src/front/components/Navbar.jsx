@@ -56,6 +56,9 @@ export const Navbar = () => {
 						</button>
 
 						<div className="sv-nav-user-area">
+							<Link to="/search" className="btn btn-sm sv-btn-ghost" onClick={closeMenu}>
+								<i className="fa-solid fa-magnifying-glass"></i> <span className="sv-nav-label">Buscar perfil</span>
+							</Link>
 							{store.user ? (
 								<>
 									<span className="sv-user-name-sm d-none d-sm-inline sv-nav-label">{store.user.nickname}</span>

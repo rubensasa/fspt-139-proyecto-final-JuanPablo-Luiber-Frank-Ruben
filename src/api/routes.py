@@ -616,3 +616,42 @@ def remove_favorite(appid):
     db.session.delete(existing)
     db.session.commit()
     return jsonify({"msg": "Removed from favorites"}), 200
+
+
+# ============ PERFIL PÚBLICO (sin cuenta ni sesión) ============
+# Cualquiera puede consultar un perfil de Steam por su SteamID64 o vanity URL,
+# igual que en la propia steamcommunity.com. Requiere STEAM_API_KEY en el
+# servidor, pero no requiere que quien mira tenga cuenta ni haya iniciado sesión.
+# Si el perfil de Steam consultado es privado, Steam simplemente no devuelve
+# los juegos/logros (no es un error nuestro).
+
+@api.route("/steam/public/<identifier>", methods=["GET"])
+def public_steam_profile(identifier):
+    try:
+        steam_id = steam_api.resolve_vanity_url(identifier)
+        profile = steam_api.fetch_player_summary(steam_id)
+    except steam_api.SteamAPIError as e:
+        return jsonify({"error": str(e)}), 404
+
+    return jsonify({"profile": profile}), 200
+
+
+@api.route("/steam/public/<steam_id>/games", methods=["GET"])
+def public_steam_games(steam_id):
+    try:
+        games = steam_api.fetch_owned_games(steam_id)
+    except steam_api.SteamAPIError as e:
+        return jsonify({"error": str(e)}), 404
+
+    games.sort(key=lambda g: g.get("playtime_forever", 0), reverse=True)
+    return jsonify({"games": games}), 200
+
+
+@api.route("/steam/public/<steam_id>/achievements/<int:appid>", methods=["GET"])
+def public_steam_achievements(steam_id, appid):
+    try:
+        achievements = steam_api.build_achievements_list(steam_id, appid)
+    except steam_api.SteamAPIError as e:
+        return jsonify({"error": str(e)}), 404
+
+    return jsonify({"appid": appid, "achievements": achievements}), 200

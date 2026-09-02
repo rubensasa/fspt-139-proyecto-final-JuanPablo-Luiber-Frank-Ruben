@@ -23,6 +23,38 @@ def _get_api_key():
     return api_key
 
 
+def resolve_vanity_url(identifier):
+    """Si 'identifier' ya es un SteamID64 (17 dígitos) lo devuelve tal cual;
+    si es un nombre de perfil (vanity URL), lo resuelve al SteamID64 real."""
+    if identifier.isdigit() and len(identifier) == 17:
+        return identifier
+
+    api_key = _get_api_key()
+    url = f"{STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/"
+    res = requests.get(url, params={"key": api_key, "vanityurl": identifier}, timeout=10)
+    if res.status_code != 200:
+        raise SteamAPIError(f"Steam respondió {res.status_code} al resolver el perfil")
+
+    data = res.json().get("response", {})
+    if data.get("success") != 1:
+        raise SteamAPIError("No se encontró ningún perfil de Steam con ese nombre")
+    return data.get("steamid")
+
+
+def fetch_player_summary(steam_id):
+    """Datos públicos básicos de un perfil: nombre, avatar, estado, etc."""
+    api_key = _get_api_key()
+    url = f"{STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/"
+    res = requests.get(url, params={"key": api_key, "steamids": steam_id}, timeout=10)
+    if res.status_code != 200:
+        raise SteamAPIError(f"Steam respondió {res.status_code} al pedir el perfil")
+
+    players = res.json().get("response", {}).get("players", [])
+    if not players:
+        raise SteamAPIError("No se encontró ningún perfil de Steam con ese ID")
+    return players[0]
+
+
 def fetch_owned_games(steam_id):
     """Devuelve la lista de juegos que posee el steam_id, vía GetOwnedGames."""
     api_key = _get_api_key()
