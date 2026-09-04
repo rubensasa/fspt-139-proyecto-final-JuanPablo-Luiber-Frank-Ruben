@@ -1,7 +1,8 @@
 """
-Llamadas a la Steam Web API oficial de Valve (distinta de steamapis.com, que ya
-se usa en /api/steam/profile). Se usa aquí para sincronizar la biblioteca de
-juegos reales y consultar logros reales de un steam_id ya vinculado.
+Llamadas a la Steam Web API oficial de Valve (distinta de steamapis.com, que se
+usa en /api/steam/profile y /api/steam/sync-games vía steam_service.py). Aquí
+se resuelve el perfil público (vanity URL / SteamID) y se consultan logros
+reales — steamapis.com no cubre logros, así que esto sigue haciendo falta.
 
 Requiere la variable de entorno STEAM_API_KEY (gratuita, se obtiene en
 https://steamcommunity.com/dev/apikey).
@@ -53,36 +54,6 @@ def fetch_player_summary(steam_id):
     if not players:
         raise SteamAPIError("No se encontró ningún perfil de Steam con ese ID")
     return players[0]
-
-
-def fetch_owned_games(steam_id):
-    """Devuelve la lista de juegos que posee el steam_id, vía GetOwnedGames."""
-    api_key = _get_api_key()
-    url = f"{STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/"
-    params = {
-        "key": api_key,
-        "steamid": steam_id,
-        "include_appinfo": 1,
-        "include_played_free_games": 1,
-    }
-    res = requests.get(url, params=params, timeout=10)
-    if res.status_code != 200:
-        raise SteamAPIError(f"Steam respondió {res.status_code} al pedir los juegos")
-
-    data = res.json()
-    games = data.get("response", {}).get("games", [])
-    return [
-        {
-            "appid": g.get("appid"),
-            "name": g.get("name"),
-            "img_icon_url": (
-                f"https://media.steampowered.com/steamcommunity/public/images/apps/{g.get('appid')}/{g.get('img_icon_url')}.jpg"
-                if g.get("img_icon_url") else None
-            ),
-            "playtime_forever": g.get("playtime_forever", 0),
-        }
-        for g in games
-    ]
 
 
 def fetch_player_achievements(steam_id, appid):

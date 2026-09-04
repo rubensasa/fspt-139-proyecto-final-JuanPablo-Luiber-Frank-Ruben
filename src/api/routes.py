@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, url_for, Blueprint, redirect, session
 from api.models import db, User, Game, UserGame, SteamAccount, Favorite
 from api.utils import generate_sitemap, APIException
 from api import steam_api
+from api.steam_service import get_steam_games, map_steam_game
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 import requests
 from urllib.parse import urlencode
@@ -495,8 +496,8 @@ def _require_linked_steam_account(user):
 @api.route("/steam/sync-games", methods=["POST"])
 @jwt_required()
 def sync_games_from_steam():
-    """Trae la biblioteca real de juegos del usuario desde la Steam Web API oficial
-    (necesita STEAM_API_KEY) y la guarda/actualiza en Game/UserGame."""
+    """Trae la biblioteca real de juegos del usuario desde SteamApis (API_KEY,
+    misma que usa /steam/profile) y la guarda/actualiza en Game/UserGame."""
 
     user_id = get_jwt_identity()
     user = db.session.get(User, user_id)
@@ -507,10 +508,11 @@ def sync_games_from_steam():
     if error:
         return error
 
-    try:
-        games_list = steam_api.fetch_owned_games(steam_id)
-    except steam_api.SteamAPIError as e:
-        return jsonify({"error": str(e)}), 502
+    data, fetch_error = get_steam_games(steam_id)
+    if fetch_error:
+        return jsonify({"error": fetch_error}), 502
+
+    games_list = [map_steam_game(g) for g in data.get("result", [])]
 
     for game_data in games_list:
         appid = game_data.get("appid")
@@ -620,8 +622,9 @@ def remove_favorite(appid):
 
 # ============ PERFIL PÚBLICO (sin cuenta ni sesión) ============
 # Cualquiera puede consultar un perfil de Steam por su SteamID64 o vanity URL,
-# igual que en la propia steamcommunity.com. Requiere STEAM_API_KEY en el
-# servidor, pero no requiere que quien mira tenga cuenta ni haya iniciado sesión.
+# igual que en la propia steamcommunity.com. No requiere que quien mira tenga
+# cuenta ni haya iniciado sesión (el perfil usa STEAM_API_KEY, los juegos
+# usan API_KEY de steamapis.com — ver sync_games_from_steam más arriba).
 # Si el perfil de Steam consultado es privado, Steam simplemente no devuelve
 # los juegos/logros (no es un error nuestro).
 
@@ -638,10 +641,11 @@ def public_steam_profile(identifier):
 
 @api.route("/steam/public/<steam_id>/games", methods=["GET"])
 def public_steam_games(steam_id):
-    try:
-        games = steam_api.fetch_owned_games(steam_id)
-    except steam_api.SteamAPIError as e:
-        return jsonify({"error": str(e)}), 404
+    data, fetch_error = get_steam_games(steam_id)
+    if fetch_error:
+        return jsonify({"error": fetch_error}), 404
+
+    games = [map_steam_game(g) for g in data.get("result", [])]
 
     games.sort(key=lambda g: g.get("playtime_forever", 0), reverse=True)
     return jsonify({"games": games}), 200
